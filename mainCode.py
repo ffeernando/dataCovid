@@ -14,11 +14,11 @@ condicionesLista = ['Confirmados', 'Sospechosos', 'Negativos', 'Defunciones']
 
 condicion = int(input('¿Qué condición desea analizar?\n 1. Confirmados \n 2. Sospechosos \n 3. Negativos \n 4. Defunciones \n'))
 
-urlEstados = 'https://datos.covid-19.conacyt.mx/Downloads/Files/Casos_Diarios_Estado_Nacional_' + condicionesLista[condicion-1] + '_' + str(fechaAyer) + '.csv'
+urlEstados = 'https://datos.covid-19.conacyt.mx/Downloads/Files/Casos_Diarios_Estado_Nacional_' + condicionesLista[condicion-1] + '_' + str(fechaHoy) + '.csv'
 
-urlMunicipios = 'https://datos.covid-19.conacyt.mx/Downloads/Files/Casos_Diarios_Municipio_' + condicionesLista[condicion-1] + '_' + str(fechaAyer) + '.csv'
+urlMunicipios = 'https://datos.covid-19.conacyt.mx/Downloads/Files/Casos_Diarios_Municipio_' + condicionesLista[condicion-1] + '_' + str(fechaHoy) + '.csv'
 
-pathListadoMunicipios = '/PATH/to/MUNICIPIOS.xlsx' #Tener un Excel que tenga todos los municipios de México ordenados por estados
+pathListadoMunicipios = '/PATH/to/MUNICIPIOS.xlsx'
 
 dFE_COVID = pd.read_csv(urlEstados)
 dFM_COVID = pd.read_csv(urlMunicipios)
@@ -49,7 +49,32 @@ nombreMunicipio = dFM_PEDIDO.values[0][2].upper()
 
 print('Los datos de ' + condicionesLista[condicion-1] + ' del municipio de ' + nombreMunicipio + ', ' + nombreEstado + ' se muestran a continuación:\n')
 
-print(dFM_PEDIDO)  #Escribe fila de su municipio
+print(dFM_PEDIDO.iloc[:2, :-14])  #Escribe fila de su municipio
 
+#Gráfica
 
-plt.plot(dFM_PEDIDO.columns.values.tolist()[3:], dFM_PEDIDO.values[0][3:])
+x = dFM_PEDIDO.columns.values.tolist()[3:-14]
+
+x_labels = []
+
+i = 0
+actualPosition = 0
+
+while(i<len(x)):
+    count=0
+    currentMonth = dt.strptime(x[i], '%d-%m-%Y').month
+    
+    while(dt.strptime(x[i], '%d-%m-%Y').month == currentMonth):
+        count = count + 1
+        i = i + 1
+        if(i==len(x)):
+            break
+    
+    for j in range(count):
+        if (j == count // 2 - 1):
+            x_labels.append(meses[currentMonth - 1])
+        else:
+            x_labels.append('')
+                            
+plt.plot(x, dFM_PEDIDO.values[0][3:-14])
+plt.xticks(x, x_labels, rotation = 45)
